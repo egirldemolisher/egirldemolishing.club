@@ -1,3 +1,4 @@
+--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.
 local GuiLibrary = shared.GuiLibrary
 local playersService = game:GetService("Players")
 local textService = game:GetService("TextService")
@@ -5082,17 +5083,13 @@ run(function()
 	GameFixer = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = "GameFixer",
 		Function = function(callback)
-			task.spawn(function()
-				if RaycastFucker.Enabled then
-					repeat
-						debug.setconstant(bedwars.SwordController.swingSwordAtMouse, -inf, callback and 'raycast' or 'Raycast')
-						debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, inf, callback and bedwars.QueryUtil or workspace)
-					until (not GameFixer.Enabled)
-				else
-					debug.setconstant(bedwars.SwordController.swingSwordAtMouse, 23, callback and 'raycast' or 'Raycast')
-					debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, callback and bedwars.QueryUtil or workspace)
-				end
-			end)
+			if RaycastFucker.Enabled then
+				debug.setconstant(bedwars.SwordController.swingSwordAtMouse, -inf, callback and 'raycast' or 'Raycast')
+				debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, inf, callback and bedwars.QueryUtil or workspace)
+			else
+				debug.setconstant(bedwars.SwordController.swingSwordAtMouse, 23, callback and 'raycast' or 'Raycast')
+				debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, callback and bedwars.QueryUtil or workspace)
+			end
 		end,
 		HoverText = "Fixes game bugs"
 	})
@@ -8890,63 +8887,151 @@ run(function()
     })
 end)
 
-run(function()
-    local AnimeImages = {Enabled = false}
-    local AnimeSelection = {Value = "Waifu2"}
+function IsAlive(plr)
+    plr = plr or lplr
+    if not plr.Character then return false end
+    if not plr.Character:FindFirstChild("Head") then return false end
+    if not plr.Character:FindFirstChild("Humanoid") then return false end
+    if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
+    return true
+end
 
-    local animefunctions = {
-        Waifu1 = function() 
-            task.spawn(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/OcassionalTrollage/WeDoNOTEnjoyTrolling/main/AnimeGirl.lua"))()   
-            end)
-        end,
-        
-        Waifu2 = function() 
-            task.spawn(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/sstvskids/AssuraWatermark/main/animegirl"))()  
-            end)
-        end
-    }
-
-	local function updateWaifuSelection()
-		local Anime = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Anime")
-		if Anime then
-			Anime:Destroy()
-		end
-
-		animefunctions[AnimeSelection.Value]()
+run(function() -- thank you SystemXVoid for letting me use this
+    local enchantexploit = {};
+    local enchantexploit = {}
+	local enchantnum = 0
+	local et = 0
+    local effects = {
+        "fire_3", "forest_3", "void_3", "static_3", "updraft_2", 
+        "shield_gen_3", "anti_knockback_2", "rapid_regen_3", "execute_3", 
+        "wind_3", "plunder_2", "critical_strike_3", "volley_3", 
+        "grounded_3", "clingy_3", "life_steal_3", "fortune_1", "fortune_2", "fortune_3"
+	   }
+	local function addEnchants()
 	end
-
-    AnimeImages = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
-        Name = "AnimeImages",
-        Function = function(callback) 
-            if callback then
-				updateWaifuSelection()
-            else
-                local Anime = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Anime")
-                if Anime then
-                    Anime:Destroy()
-                end
+    enchantexploit = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
+        Name = 'Dupe',
+        HoverText = 'Gives u stuff.',
+        Function = function(calling)
+            if calling then 
+				pcall(function()
+					if shared.GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Enabled then else
+						shared.GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.ToggleButton()
+				   end
+				end)
+				warningNotification("Dupe", "This module might not work every time! Use it before the match starts", 5)
+				et = 0
+				RunLoops:BindToStepped("enchant",function()
+					et = et + 1
+					if et == 45 then
+						for i,v in effects do 
+							bedwars.Client:Get("RequestFortuneDoubleDown").instance:FireServer({statusEffectType = v})
+						end
+						et = 0
+					end
+				end)
+			else
+				RunLoops:UnbindFromStepped("enchant")
             end
-        end,
-        ExtraText = function()
-            return AnimeSelection.Value
+			task.spawn(function()
+				repeat 
+					local args = {
+						[1] = {
+							["statusEffectType"] = "fortune_1",
+							["fortuneStacks"] = 9999999999999999
+						}
+					}
+					game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("RequestFortuneCashOut"):FireServer(unpack(args))
+					task.wait(0.1)
+					local args = {
+						[1] = {
+							["player"] = game:GetService("Players").LocalPlayer
+						}
+					}
+					
+					game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("FortuneEnchantRequestDoubleDownAmount"):InvokeServer(unpack(args))						
+				until not enchantexploit.Enabled
+			end)
         end
     })
-	AnimeSelection = AnimeImages.CreateDropdown({
-		Name = "Selection",
-		Function = function(newSelection)
-			AnimeSelection.Value = newSelection
-			updateWaifuSelection()
-		end,
-		List = {"Waifu1", "Waifu2"}
-	})	
+end)
+
+run(function()
+    local GodMode = {Enabled = false}
+	local TargetDistanceVal = {Value = 25}
+    GodMode = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
+        Name = "Funny AntiHit",
+        Function = function(callback)
+            if callback then
+				spawn(function()
+					while task.wait() do
+						if (not GodMode.Enabled) then return end
+						if (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) then
+							for i, v in pairs(game:GetService("Players"):GetChildren()) do
+								if v.Team ~= lplr.Team and IsAlive(v) and IsAlive(lplr) then
+									if v and v ~= lplr then
+										local TargetDistance = lplr:DistanceFromCharacter(v.Character:FindFirstChild("HumanoidRootPart").CFrame.p)
+										if TargetDistance < TargetDistanceVal.Value then
+											if not lplr.Character.HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
+												repeat task.wait() until store.matchState ~= 0
+												if not (v.Character.HumanoidRootPart.Velocity.Y < -10*5) then
+													lplr.Character.Archivable = true
+
+													local Clone = lplr.Character:Clone()
+													Clone.Parent = workspace
+													Clone.Head:ClearAllChildren()
+													gameCamera.CameraSubject = Clone:FindFirstChild("Humanoid")
+
+													for i,v in pairs(Clone:GetChildren()) do
+														if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
+															v.Transparency = 1
+														end
+														if v:IsA("Accessory") then
+															v:FindFirstChild("Handle").Transparency = 1
+														end
+													end
+
+													lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,100000,0)
+
+													game:GetService("RunService").RenderStepped:Connect(function()
+														if Clone ~= nil and Clone:FindFirstChild("HumanoidRootPart") then
+															Clone.HumanoidRootPart.Position = Vector3.new(lplr.Character.HumanoidRootPart.Position.X, Clone.HumanoidRootPart.Position.Y, lplr.Character.HumanoidRootPart.Position.Z)
+														end
+													end)
+
+													task.wait(0.3)
+													lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X, -1, lplr.Character.HumanoidRootPart.Velocity.Z)
+													lplr.Character.HumanoidRootPart.CFrame = Clone.HumanoidRootPart.CFrame
+													gameCamera.CameraSubject = lplr.Character:FindFirstChild("Humanoid")
+													Clone:Destroy()
+													task.wait(0.15)
+												end
+											end
+										end
+									end
+								end
+							end
+						end
+					end
+				end)
+			end
+        end
+    })
+	TargetDistanceVal = GodMode.CreateSlider({
+        Name = "TargetDistance",
+        Min = 0,
+        Max = 25,
+        Default = 25,
+        Function = function(val)
+            TargetDistanceVal.Value = val
+        end
+    })
 end)
 
 run(function()
     local transformed = false
-    local CustomPacks = {Enabled = false}
-    local PackSelection = {Value = "VioletDreams"}
+    local CustomPacks = {["Enabled"] = false}
+    local PackSelection = {["Value"] = "Marin"}
 
     local packfunctions = {
         VioletDreams = function() 
@@ -9104,214 +9189,6 @@ run(function()
             PerformAction()
         end
     end)
-end)
-
-
-function IsAlive(plr)
-    plr = plr or lplr
-    if not plr.Character then return false end
-    if not plr.Character:FindFirstChild("Head") then return false end
-    if not plr.Character:FindFirstChild("Humanoid") then return false end
-    if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
-    return true
-end
-
-run(function()
-	local antihit = {};
-	local running = false;
-	local newroot;
-	local oldroot;
-	local ez = false;
-	local function cloneFunction()
-		lplr.Character.Parent = game
-        lplr.Character.HumanoidRootPart.Archivable = true
-		oldroot = lplr.Character.HumanoidRootPart 
-		newroot = oldroot:Clone()
-		newroot.Parent = lplr.Character
-		oldroot.Parent = workspace
-		lplr.Character.PrimaryPart = newroot
-		lplr.Character.Parent = workspace
-		oldroot.Transparency = 0.4
-		entityLibrary.character.HumanoidRootPart = newroot
-		table.insert(antihit.Connections, runservice.RenderStepped:Connect(function()
-			if not running then
-				if ez then return end
-				ez = true
-				tweening = tween:Create(oldroot, TweenInfo.new(0.3), {CFrame = lplr.Character.HumanoidRootPart.CFrame}):Play()
-				task.wait(2)
-				ez = false
-				tweening = nil
-			end
-		end))
-		table.insert(antihit.Connections, runservice.Stepped:Connect(function()
-			if lplr.Character and newroot.Parent == lplr.Character and oldroot.Parent then 
-				oldroot.Velocity = Vector3.zero
-			end
-		end))
-	end
-	local function restoreFunction()
-		lplr.Character.Parent = game
-		oldroot.Parent = lplr.Character
-		newroot.Parent = workspace
-		lplr.Character.PrimaryPart = oldroot
-		lplr.Character.Parent = workspace
-		newroot.CFrame = oldroot.CFrame
-		entityLibrary.character.HumanoidRootPart = oldroot
-		newroot:Remove()
-		newroot = {} 
-		oldroot = {}
-	end
-	local antihitylvl = {}
-	local antihitmode = {
-		InfiniteFly = function(root)
-			running = true
-			local lastpos = root.Position
-			root.CFrame = CFrame.new((root.Position + Vector3.new(0, antihitylvl.Value, 0)))
-			repeat task.wait(0.1) until store.antihit.rootpart == nil
-			root.CFrame = CFrame.new(lastpos)
-			running = false
-		end,
-		Head = function(root)
-			running = true
-			root.CFrame = CFrame.new((root.Position + Vector3.new(0, 10, 0)))
-			running = false
-		end
-	};
-	local antihitfunc = {};
-	antihit = blatant.Api.CreateOptionsButton({
-		Name = 'MaxAntiHit',
-		Function = function(call)
-			if call then
-				cloneFunction()
-				repeat
-					local plrs = GetAllTargets(23)
-					if #plrs > 0 then
-						for i,v in plrs do
-							if not running and store.antihit.attacking then 
-								task.spawn(antihitmode[antihitfunc.Value], oldroot) 
-							end
-						end	
-					end
-					task.wait()
-				until (not antihit.Enabled)
-			else
-				restoreFunction()
-			end
-		end,
-		HoverText = 'Avoiding people from hitting you\n this will also make your killaura feels a bit weird.'
-	})
-	antihitfunc = antihit.CreateDropdown({
-		Name = 'Mode',
-		List = {'InfiniteFly', 'Head'},
-		HoverText = 'Different type of antihit.',
-		Function = function(v)
-			if v == 'InfiniteFly' then
-				antihitylvl.Object.Visible = not antihitylvl.Object.Visible
-			end
-		end
-	})
-	antihitylvl = antihit.CreateSlider({
-		Name = 'Y Level',
-		Min = 50,
-		Max = 5000,
-		Default = 1000,
-		Function = void,
-		HoverText = 'y level'
-	})
-	antihitylvl.Object.Visible = false
-end)
-
-run(function()
-    local GodMode = {Enabled = false}
-	local TargetDistanceVal = {Value = 25}
-	local Wait1 = {Value = 0.1}
-	local Wait2 = {Value = 0.1}
-    GodMode = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
-        Name = "FunnyAntiHit",
-		HoverText = "credits to nebula 🤑",
-        Function = function(callback)
-            if callback then
-				spawn(function()
-					while task.wait() do
-						if (not GodMode.Enabled) then return end
-						if (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) then
-							for i, v in pairs(game:GetService("Players"):GetChildren()) do
-								if v.Team ~= lplr.Team and IsAlive(v) and IsAlive(lplr) then
-									if v and v ~= lplr then
-										local TargetDistance = lplr:DistanceFromCharacter(v.Character:FindFirstChild("HumanoidRootPart").CFrame.p)
-										if TargetDistance < TargetDistanceVal.Value then
-											if not lplr.Character.HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
-												repeat task.wait() until store.matchState ~= 0
-												if not (v.Character.HumanoidRootPart.Velocity.Y < -10*5) then
-													lplr.Character.Archivable = true
-
-													local Clone = lplr.Character:Clone()
-													Clone.Parent = workspace
-													Clone.Head:ClearAllChildren()
-													gameCamera.CameraSubject = Clone:FindFirstChild("Humanoid")
-
-													for i,v in pairs(Clone:GetChildren()) do
-														if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
-															v.Transparency = 1
-														end
-														if v:IsA("Accessory") then
-															v:FindFirstChild("Handle").Transparency = 1
-														end
-													end
-
-													lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,9e9,0)
-
-													game:GetService("RunService").RenderStepped:Connect(function()
-														if Clone ~= nil and Clone:FindFirstChild("HumanoidRootPart") then
-															Clone.HumanoidRootPart.Position = Vector3.new(lplr.Character.HumanoidRootPart.Position.X, Clone.HumanoidRootPart.Position.Y, lplr.Character.HumanoidRootPart.Position.Z)
-														end
-													end)
-
-													task.wait(Wait1.Value)
-													lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X, -1, lplr.Character.HumanoidRootPart.Velocity.Z)
-													lplr.Character.HumanoidRootPart.CFrame = Clone.HumanoidRootPart.CFrame
-													gameCamera.CameraSubject = lplr.Character:FindFirstChild("Humanoid")
-													Clone:Destroy()
-													task.wait(Wait2.Value)
-												end
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end)
-			end
-        end
-    })
-	TargetDistanceVal = GodMode.CreateSlider({
-        Name = "TargetDistance",
-        Min = 0,
-        Max = 25,
-        Default = 25,
-        Function = function(val)
-            TargetDistanceVal.Value = val
-        end
-    })
-	Wait1 = GodMode.CreateSlider({
-        Name = "Wait1",
-        Min = 0.001,
-        Max = 0.15,
-        Default = 0.15,
-        Function = function(val)
-            TargetDistanceVal.Value = val
-        end
-    })
-	Wait2 = GodMode.CreateSlider({
-        Name = "Wait2",
-        Min = 0.001,
-        Max = 0.3,
-        Default = 0.3,
-        Function = function(val)
-            TargetDistanceVal.Value = val
-        end
-    })
 end)
 
 run(function()
